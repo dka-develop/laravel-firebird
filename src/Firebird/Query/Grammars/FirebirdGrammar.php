@@ -2,6 +2,7 @@
 
 use Illuminate\Database\Query\Grammars\Grammar;
 use Illuminate\Database\Query\Builder;
+use Firebird\Query\Builder as FirebirdBuilder;
 
 class FirebirdGrammar extends Grammar
 {
@@ -14,12 +15,12 @@ class FirebirdGrammar extends Grammar
     protected $operators = [
         '=', '<', '>', '<=', '>=', '<>', '!=',
         'like', 'not like', 'between', 'containing', 'starting with',
-        'similar to', 'not similar to',
+        'similar to', 'not similar to', 'rand'
     ];
 
     /**
      * Compile SQL statement for get context variable value
-     * 
+     *
      * @param \Illuminate\Database\Query\Builder  $query
      * @param string $namespace
      * @param string $name
@@ -29,10 +30,10 @@ class FirebirdGrammar extends Grammar
     {
         return "SELECT RDB\$GET_CONTEXT('{$namespace}', '{$name}' AS VAL FROM RDB\$DATABASE";
     }
-    
+
     /**
      * Compile SQL statement for execute function
-     * 
+     *
      * @param \Illuminate\Database\Query\Builder  $query
      * @param string $function
      * @param array $values
@@ -41,13 +42,13 @@ class FirebirdGrammar extends Grammar
     public function compileExecFunction(Builder $query, $function, array $values = null)
     {
         $function = $this->wrap($function);
-        
+
         return "SELECT  {$function} (" . $this->parameterize($values) . ") AS VAL FROM RDB\$DATABASE";
-    }    
+    }
 
     /**
      * Compile SQL statement for execute procedure
-     * 
+     *
      * @param \Illuminate\Database\Query\Builder  $query
      * @param string $procedure
      * @param array $values
@@ -56,7 +57,7 @@ class FirebirdGrammar extends Grammar
     public function compileExecProcedure(Builder $query, $procedure, array $values = null)
     {
         $procedure = $this->wrap($procedure);
-        
+
         return "EXECUTE PROCEDURE {$$procedure} (" . $this->parameterize($values) . ')';
     }
 
@@ -84,6 +85,7 @@ class FirebirdGrammar extends Grammar
      * @param  int  $limit
      * @return string
      */
+
     protected function compileLimit(Builder $query, $limit)
     {
         if ($query->offset) {
@@ -112,7 +114,7 @@ class FirebirdGrammar extends Grammar
 
     /**
      * Compile SQL statement for get next sequence value
-     * 
+     *
      * @param \Illuminate\Database\Query\Builder  $query
      * @param string $sequence
      * @param int $increment
@@ -136,6 +138,7 @@ class FirebirdGrammar extends Grammar
      * @param  int  $offset
      * @return string
      */
+
     protected function compileOffset(Builder $query, $offset)
     {
         if ($query->limit) {
